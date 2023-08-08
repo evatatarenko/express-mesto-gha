@@ -9,8 +9,8 @@ const {
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const usersRouter = require('./routes/users.js');
-const cardsRouter = require('./routes/cards.js');
+const usersRouter = require('./routes/users');
+const cardsRouter = require('./routes/cards');
 
 const app = express();
 mongoose.connection.on('error', () => {
