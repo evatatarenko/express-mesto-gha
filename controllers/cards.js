@@ -47,25 +47,27 @@ const addLike = (req, res) => {
       { new: true },
     )
       .then((card) => {
+        console.log(req.params.cardId);
         if (!card) {
           throw new Error('NotFoundError');
         }
-        if (card.length !== 24) {
+        if (req.params.cardId.length !== 24) {
           throw new Error('Неверный id');
         }
         res.send({ data: card });
       })
       .catch((err) => {
-        if (err.message === 'CastError') {
-          res.status(404).send({ message: 'Карточка не найдена' });
+        if (err.name === 'CastError') {
+          res.status(400).send({ message: 'Переданы некорректные данные' });
         } else if (err.name === 'ValidationError') {
           res.status(400).send({ message: 'Переданы некорректные данные' });
         } else if (err.message === 'NotFoundError') {
           res.status(404).send({ message: 'Карточка не найдена' });
         } else if (err.message === 'Неверный id') {
+          console.log(err.message);
           res.status(400).send({ message: 'Переданы некорректные данные' });
         } else {
-          console.log(err.message);
+          console.log(err.name);
           res.status(500).send({ message: 'На сервере произошла ошибка' });
         }
       });
@@ -85,7 +87,7 @@ const deleteLike = (req, res) => {
         if (!card) {
           throw new Error('NotFoundError');
         }
-        if (card.length !== 24) {
+        if (req.params.cardId.length !== 24) {
           throw new Error('Неверный id');
         }
         res.send({ data: card });
