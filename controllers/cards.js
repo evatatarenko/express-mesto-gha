@@ -84,16 +84,20 @@ const deleteLike = (req, res) => {
       { new: true },
     )
       .then((card) => {
-        if (!card) {
-          throw new Error('NotFoundError');
-        }
+        console.log(req.params.cardId);
         if (req.params.cardId.length !== 24) {
           throw new Error('Неверный id');
+        } else if (!card) {
+          throw new Error('NotFoundError');
         }
         res.send({ data: card });
       })
       .catch((err) => {
-        if (err.name === 'CastError') {
+        if (err.name === 'CastError' && req.params.cardId.length !== 24) {
+          console.log(err.name);
+          res.status(400).send({ message: 'Переданы некорректные данные' });
+        } else if (err.name === 'CastError') {
+          console.log(err.name);
           res.status(404).send({ message: 'Карточка не найдена' });
         } else if (err.name === 'ValidationError') {
           res.status(400).send({ message: 'Переданы некорректные данные' });
