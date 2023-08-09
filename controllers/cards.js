@@ -31,7 +31,14 @@ const deleteCard = (req, res) => {
         }
         res.send({ data: card });
       })
-      .catch(() => res.status(404).send({ message: 'Карточка не найдена' }));
+      .catch((err) => {
+        console.log(err.name);
+        if (err.name === 'CastError') {
+          res.status(400).send({ message: 'Переданы некорректные данные' });
+        } else {
+          res.status(404).send({ message: 'Карточка не найдена' });
+        }
+      });
   } catch (err) {
     if (req.params.cardId.length !== 24) {
       res.status(400).send({ message: 'Переданы некорректные данные' });
