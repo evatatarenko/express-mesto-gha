@@ -7,6 +7,9 @@ const getUser = (req, res) => {
     if (id) {
       User.findById({ _id: id })
         .then((user) => {
+          if (!user) {
+            throw new Error('Пользователь не найден');
+          }
           res.send({ data: user });
         })
         .catch((err) => {
@@ -14,6 +17,8 @@ const getUser = (req, res) => {
             res.status(400).send({ message: 'Переданы некорректные данные' });
           } else if (err.name === 'ValidationError') {
             res.status(400).send({ message: 'Переданы некорректные данные' });
+          } else if (err.message === 'Пользователь не найден') {
+            res.status(404).send({ message: 'Пользователь не найден' });
           } else {
             res.status(500).send({ message: 'На сервере произошла ошибка' });
           }
@@ -41,6 +46,7 @@ const createUser = (req, res) => {
   })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
+      console.log(err.name);
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else {
