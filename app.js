@@ -37,7 +37,7 @@ app.use((req, res, next) => {
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
 
-app.use('/:404', (req, res, next) => {
+app.use('/', (req, res, next) => {
   res.status(404).send({ message: 'страница не найдена' });
   next();
 });
