@@ -54,7 +54,12 @@ const deleteCard = async (req, res) => {
       return;
     }
 
-    const card = await Card.findByIdAndRemove(req.params.cardId).orFail();
+    const card = await Card.findByIdAndRemove(req.params.cardId);
+
+    if (!card) {
+      res.status(404).send({ message: 'Карточка не найдена' });
+      return;
+    }
 
     res.send({ data: card });
   } catch (err) {
@@ -106,14 +111,19 @@ const deleteCard = async (req, res) => {
 
 const addLike = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.cardId)) {
+      res.status(400).send({ message: 'Неверный id' });
+      return;
+    }
+
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
       { $addToSet: { likes: req.user._id } },
       { new: true },
-    ).orFail();
+    );
 
-    if (!mongoose.Types.ObjectId.isValid(req.params.cardId)) {
-      res.status(400).send({ message: 'Неверный id' });
+    if (!card) {
+      res.status(404).send({ message: 'Карточка не найдена' });
       return;
     }
 
@@ -177,7 +187,12 @@ const deleteLike = async (req, res) => {
       req.params.cardId,
       { $pull: { likes: req.user._id } },
       { new: true },
-    ).orFail();
+    );
+
+    if (!card) {
+      res.status(404).send({ message: 'Карточка не найдена' });
+      return;
+    }
 
     res.send({ data: card });
   } catch (err) {
