@@ -2,112 +2,89 @@
 const mongoose = require('mongoose');
 const Card = require('../models/card');
 
-const createCard = (req, res) => {
+const Forbidden = require('../Errors/forbidden');
+const NotFound = require('../Errors/notFound');
+
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
-  const id = req.user._id;
-
-  Card.create({ name, link, owner: id })
+  const owner = req.user;
+  Card.create({ name, link, owner })
+    .then((card) => card.populate('owner'))
     .then((card) => res.status(201).send({ data: card }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(500).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+    .catch(next);
 };
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.send({ data: cards }))
-    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
+    .populate([
+      { path: 'owner', model: 'user' },
+      { path: 'likes', model: 'user' },
+    ])
+    .then((card) => {
+      res.status(200).send({ data: card });
+    })
+    .catch(next);
 };
 
-const deleteCard = async (req, res) => {
-  try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.cardId)) {
-      res.status(400).send({ message: 'Неверный id' });
-      return;
-    }
+const deleteCard = (req, res, next) => {
+  const _id = req.params.cardId;
 
-    const card = await Card.findByIdAndRemove(req.params.cardId);
-
-    if (!card) {
-      res.status(404).send({ message: 'Карточка не найдена' });
-      return;
-    }
-
-    res.send({ data: card });
-  } catch (err) {
-    if (err.name === 'CastError' || err.name === 'NotFoundError') {
-      res.status(404).send({ message: 'Карточка не найдена' });
-    } else {
-      console.error(err);
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
-    }
-  }
+  Card.findOne({ _id })
+    .populate([
+      { path: 'owner', model: 'user' },
+    ])
+    .then((card) => {
+      if (!card) {
+        throw new NotFound('Карточка была удалена');
+      }
+      if (card.owner._id.toString() !== req.user._id.toString()) {
+        throw new Forbidden('Вы не можете удалить карточку другого пользователя');
+      }
+      Card.findByIdAndDelete({ _id })
+        .populate([
+          { path: 'owner', model: 'user' },
+        ])
+        .then((cardDeleted) => {
+          res.send({ data: cardDeleted });
+        });
+    })
+    .catch(next);
 };
 
-const addLike = async (req, res) => {
-  try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.cardId)) {
-      res.status(400).send({ message: 'Неверный id' });
-      return;
-    }
-
-    const card = await Card.findByIdAndUpdate(
-      req.params.cardId,
-      { $addToSet: { likes: req.user._id } },
-      { new: true },
-    );
-
-    if (!card) {
-      res.status(404).send({ message: 'Карточка не найдена' });
-      return;
-    }
-
-    res.send({ data: card });
-  } catch (err) {
-    if (err.name === 'CastError' || err.name === 'NotFoundError') {
-      res.status(400).send({ message: 'Переданы некорректные данные' });
-    } else if (err instanceof mongoose.Error.ValidationError) {
-      res.status(400).send({ message: 'Переданы некорректные данные' });
-    } else {
-      console.error(err);
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
-    }
-  }
+const addLike = (req, res, next) => {
+  const owner = req.user._id;
+  Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: owner } }, { new: true })
+    .populate([
+      { path: 'owner', model: 'user' },
+      { path: 'likes', model: 'user' },
+    ])
+    .then((card) => {
+      if (card) {
+        return res.send({ data: card });
+      }
+      return res
+        .status(404)
+        .send({ message: `Карточка не найдена 404` });
+    })
+    .catch(next);
 };
 
-const deleteLike = async (req, res) => {
-  try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.cardId)) {
-      res.status(400).send({ message: 'Неверный id' });
-      return;
-    }
-
-    const card = await Card.findByIdAndUpdate(
-      req.params.cardId,
-      { $pull: { likes: req.user._id } },
-      { new: true },
-    );
-
-    if (!card) {
-      res.status(404).send({ message: 'Карточка не найдена' });
-      return;
-    }
-
-    res.send({ data: card });
-  } catch (err) {
-    if (err.name === 'CastError' || err.name === 'NotFoundError') {
-      res.status(404).send({ message: 'Карточка не найдена' });
-    } else if (err instanceof mongoose.Error.ValidationError) {
-      res.status(400).send({ message: 'Переданы некорректные данные' });
-    } else {
-      console.error(err);
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
-    }
-  }
+const deleteLike = (req, res, next) => {
+  const owner = req.user._id;
+    Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: owner } }, { new: true })
+      .populate([
+        { path: 'owner', model: 'user' },
+        { path: 'likes', model: 'user' },
+      ])
+      .then((card) => {
+        if (card) {
+          return res.send({ data: card });
+        }
+        return res
+          .status(404)
+          .send({ message: `Карточка не найдена 404` });
+      })
+      .catch(next);
 };
 
 module.exports = {

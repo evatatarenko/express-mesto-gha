@@ -6,11 +6,16 @@ const {
   URI = 'mongodb://127.0.0.1:27017/mestodb',
 } = process.env;
 
+const cookieParser = require('cookie-parser');
+const errorCelebrate = require('celebrate').errors;
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
+const { login, createUser } = require('./controllers/users');
+const { validateSignin, validateSignup } = require('./middlewares/validation');
+const errorHandlers = require('./utils/handlers');
 
 const app = express();
 mongoose.connection.on('error', () => {
@@ -25,20 +30,31 @@ mongoose.connect(URI);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(errorHandlers);
+app.use(errorCelebrate());
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '64cd11dac554369263de0a82', // вставьте сюда _id созданного в предыдущем пункте пользователя
-  };
 
-  next();
-});
+app.post('/signin', validateSignin, login);
+app.post('/signup', validateSignup, createUser);
 
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
 
 app.use('/', (req, res, next) => {
   res.status(404).send({ message: 'страница не найдена' });
+  next();
+});
+
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+
+  res
+    .status(statusCode)
+    .send({
+      message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
+    });
+
   next();
 });
 
