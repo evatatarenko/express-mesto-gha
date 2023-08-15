@@ -29,7 +29,7 @@ module.exports = (err, req, res, next) => {
   if (err.code === 11000) {
     return res
       .status(409)
-      .send({ message: 'Адрес почты уже зарегистрирован' });
+      .send({ message: 'Почта уже зарегистрирована' });
   }
 
   res

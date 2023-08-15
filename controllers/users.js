@@ -22,6 +22,7 @@ const getUser = (req, res, next) => {
 };
 
 const getUsers = (req, res, next) => {
+  console.log(next)
   User.find({})
     .then((user) => res.status(200).send(user))
     .catch(next);

@@ -17,6 +17,7 @@ const cardsRouter = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
 const { validateSignin, validateSignup } = require('./middlewares/validation');
 const errorHandlers = require('./utils/handlers');
+const auth = require('./middlewares/auth')
 
 const app = express();
 mongoose.connection.on('error', () => {
@@ -35,13 +36,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(errorHandlers);
 app.use(errorCelebrate());
+// app.use(helmet());
+// app.use(errorCelebrate());
+// app.use(errorHandlers);
 
 
 app.post('/signin', validateSignin, login);
 app.post('/signup', validateSignup, createUser);
 
-app.use('/users', usersRouter);
-app.use('/cards', cardsRouter);
+app.use('/users', auth, usersRouter);
+app.use('/cards', auth, cardsRouter);
 
 app.use('/', (req, res, next) => {
   res.status(404).send({ message: 'страница не найдена' });
@@ -49,12 +53,13 @@ app.use('/', (req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
+  // console.log(err)
+  const { type = 500, message } = err;
 
   res
-    .status(statusCode)
+    .status(type)
     .send({
-      message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
+      message: type === 500 ? 'На сервере произошла ошибка' : message,
     });
 
   next();
