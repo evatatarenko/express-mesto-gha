@@ -35,7 +35,7 @@ module.exports = (err, req, res, next) => {
   res
     .status(500)
     .send({
-      message: 'На сервере произошла ошибка',
+      message: 'На сервере произошла ошибкас',
     });
 
   return next();
