@@ -81,7 +81,13 @@ const changeUser = (req, res, next) => {
       new: true,
       runValidators: true,
     })
-      .then((user) => checkUser(user, res))
+      .then((user) => {
+        if (user) {
+          return res.send({ data: user });
+        }
+        const error = new NotFound('Пользователь по указанному _id не найден');
+        return next(error);
+      })
       .catch(next);
 };
 
@@ -92,7 +98,13 @@ const changeAvatar = (req, res, next) => {
     new: true,
     runValidators: true,
   })
-    .then((user) => checkUser(user, res))
+    .then((user) => {
+      if (user) {
+        return res.send({ data: user });
+      }
+      const error = new NotFound('Пользователь по указанному _id не найден');
+      return next(error);
+    })
     .catch(next);
 };
 
