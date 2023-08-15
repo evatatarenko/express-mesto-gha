@@ -12,13 +12,13 @@ const {
 const { validateId, validateProfile, validateAvatar } = require('../middlewares/validation');
 
 usersRouter.route('/').get(getUsers);
-
+usersRouter.get('/me', getMyProfile);
 usersRouter.get('/:userId', validateId, getUser);
 
 usersRouter.post('/', createUser);
 
 usersRouter.patch('/me', validateProfile, changeUser);
-usersRouter.get('/me', getMyProfile);
+
 usersRouter.patch('/me/avatar', validateAvatar, changeAvatar);
 
 module.exports = usersRouter;
