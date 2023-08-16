@@ -3,7 +3,6 @@ const usersRouter = require('express').Router();
 const {
   getUser,
   getUsers,
-  createUser,
   changeUser,
   changeAvatar,
   getMyProfile,
@@ -14,8 +13,6 @@ const { validateId, validateProfile, validateAvatar } = require('../middlewares/
 usersRouter.route('/').get(getUsers);
 usersRouter.get('/me', getMyProfile);
 usersRouter.get('/:userId', validateId, getUser);
-
-// usersRouter.post('/', createUser);
 
 usersRouter.patch('/me', validateProfile, changeUser);
 
