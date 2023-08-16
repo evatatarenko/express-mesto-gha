@@ -1,9 +1,9 @@
 /* eslint-disable linebreak-style */
-const User = require("../models/user");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const { JWT_SECRET = "hghghghghghghghg" } = process.env;
-const NotFound = require("../Errors/notFound");
+const User = require('../models/user');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET = 'hghghghghghghghg' } = process.env;
+const NotFound = require('../Errors/notFound');
 
 console.log(JWT_SECRET);
 
@@ -16,7 +16,7 @@ const getUser = (req, res, next) => {
         return res.send({ data: user });
       }
       if (!user) {
-        throw new NotFound("Пользователь не найден");
+        throw new NotFound('Пользователь не найден');
       }
     })
     .catch((error) => {
@@ -59,10 +59,10 @@ const login = (req, res, next) => {
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-        expiresIn: "7d",
+        expiresIn: '7d',
       });
       res
-        .cookie("token", token, {
+        .cookie('token', token, {
           maxAge: 3600000,
           httpOnly: true,
           sameSite: true,
@@ -87,7 +87,7 @@ const changeUser = (req, res, next) => {
       if (user) {
         return res.send({ data: user });
       }
-      const error = new NotFound("Пользователь по указанному _id не найден");
+      const error = new NotFound('Пользователь по указанному _id не найден');
       return next(error);
     })
     .catch(next);
@@ -108,7 +108,7 @@ const changeAvatar = (req, res, next) => {
       if (user) {
         return res.send({ data: user });
       }
-      const error = new NotFound("Пользователь по указанному _id не найден");
+      const error = new NotFound('Пользователь по указанному _id не найден');
       return next(error);
     })
     .catch(next);
