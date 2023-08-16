@@ -48,15 +48,8 @@ const deleteCard = (req, res, next) => {
 
 const addLike = (req, res, next) => {
   const owner = req.user._id;
-  Card.findByIdAndUpdate(
-    req.params.cardId,
-    { $addToSet: { likes: owner } },
-    { new: true }
-  )
-    .populate([
-      { path: 'owner', model: 'user' },
-      { path: 'likes', model: 'user' },
-    ])
+  Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: owner } }, { new: true })
+    .populate([{ path: 'owner', model: 'user' }, { path: 'likes', model: 'user' }])
     .then((card) => {
       if (card) {
         return res.send({ data: card });
