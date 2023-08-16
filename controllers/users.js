@@ -3,6 +3,7 @@ const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET = 'hghghghghghghghg' } = process.env;
+const NotFound = require('../Errors/notFound');
 
 console.log(JWT_SECRET)
 
@@ -14,9 +15,9 @@ const getUser = (req, res, next) => {
       if (user) {
         return res.send({ data: user });
       }
-      return res
-        .status(404)
-        .send({ message: 'Пользователь не найден' });
+      if (!user) {
+        throw new NotFound('Пользователь не найден');
+      }
     })
     .catch((error) => {
       next(error);
@@ -50,7 +51,7 @@ const createUser = (req, res, next) => {
     .catch(next);
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -67,11 +68,7 @@ const login = (req, res) => {
         })
         .send({ token });
     })
-    .catch((err) => {
-      res
-        .status(401)
-        .send({ message: err.message });
-    });
+    .catch(next);
 };
 
 const changeUser = (req, res, next) => {

@@ -5,7 +5,7 @@ const NotFound = require('../Errors/notFound');
 const Forbidden = require('../Errors/forbidden');
 
 module.exports = (err, req, res, next) => {
-  console.log(err)
+  console.log('это в хандлере',err)
   if (err instanceof CastError || err instanceof ValidationError) {
     return res
       .status(400)

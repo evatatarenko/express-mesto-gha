@@ -15,7 +15,7 @@ usersRouter.route('/').get(getUsers);
 usersRouter.get('/me', getMyProfile);
 usersRouter.get('/:userId', validateId, getUser);
 
-usersRouter.post('/', createUser);
+// usersRouter.post('/', createUser);
 
 usersRouter.patch('/me', validateProfile, changeUser);
 
