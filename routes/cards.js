@@ -8,7 +8,7 @@ const {
   deleteLike,
 } = require('../controllers/cards');
 
-const validation = require('../middlewares/validation')
+const validation = require('../middlewares/validation');
 
 cardsRouter.delete('/:cardId', validation.validateCardId, deleteCard);
 cardsRouter.get('/', getCards);

@@ -17,7 +17,7 @@ const cardsRouter = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
 const validation = require('./middlewares/validation');
 const errorHandlers = require('./utils/handlers');
-const auth = require('./middlewares/auth')
+const auth = require('./middlewares/auth');
 
 const app = express();
 mongoose.connection.on('error', () => {

@@ -1,5 +1,4 @@
 /* eslint-disable linebreak-style */
-const mongoose = require('mongoose');
 const Card = require('../models/card');
 
 const Forbidden = require('../Errors/forbidden');
@@ -9,7 +8,7 @@ const createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user;
   Card.create({ name, link, owner })
-    .then((card) => card.populate('owner'))
+    .then((card) => card.populate('owner').execPopulate())
     .then((card) => res.status(201).send({ data: card }))
     .catch(next);
 };
@@ -20,16 +19,16 @@ const getCards = (req, res, next) => {
       { path: 'owner', model: 'user' },
       { path: 'likes', model: 'user' },
     ])
-    .then((card) => {
-      res.status(200).send({ data: card });
+    .then((cards) => {
+      res.status(200).send({ data: cards });
     })
     .catch(next);
 };
 
 const deleteCard = (req, res, next) => {
-  const _id = req.params.cardId;
+  const cardId = req.params.cardId;
 
-  Card.findOne({ _id })
+  Card.findOne({ _id: cardId })
     .populate([{ path: 'owner', model: 'user' }])
     .then((card) => {
       if (!card) {
@@ -40,7 +39,7 @@ const deleteCard = (req, res, next) => {
           'Вы не можете удалить карточку другого пользователя'
         );
       }
-      Card.findByIdAndDelete({ _id })
+      return Card.findByIdAndDelete(cardId)
         .populate([{ path: 'owner', model: 'user' }])
         .then((cardDeleted) => {
           res.send({ data: cardDeleted });
@@ -51,8 +50,10 @@ const deleteCard = (req, res, next) => {
 
 const addLike = (req, res, next) => {
   const owner = req.user._id;
+  const cardId = req.params.cardId;
+
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    cardId,
     { $addToSet: { likes: owner } },
     { new: true }
   )
@@ -71,8 +72,10 @@ const addLike = (req, res, next) => {
 
 const deleteLike = (req, res, next) => {
   const owner = req.user._id;
+  const cardId = req.params.cardId;
+
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    cardId,
     { $pull: { likes: owner } },
     { new: true }
   )

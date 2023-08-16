@@ -1,7 +1,7 @@
 /* eslint-disable linebreak-style */
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const { JWT_SECRET = 'hghghghghghghghg' } = process.env;
 const NotFound = require('../Errors/notFound');
 
