@@ -1,23 +1,20 @@
 /* eslint-disable linebreak-style */
-const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET = 'hghghghghghghghg' } = process.env;
-const NotFound = require('../Errors/notFound');
 
-console.log(JWT_SECRET);
+const User = require('../models/user');
+const NotFound = require('../Errors/notFound');
+const { JWT_SECRET = 'hghghghghghghghg' } = process.env;
 
 const getUser = (req, res, next) => {
   const { userId } = req.params;
 
   User.findById(userId)
     .then((user) => {
-      if (user) {
-        return res.send({ data: user });
-      }
       if (!user) {
         throw new NotFound('Пользователь не найден');
       }
+      return res.send({ data: user });
     })
     .catch((error) => {
       next(error);
@@ -25,7 +22,6 @@ const getUser = (req, res, next) => {
 };
 
 const getUsers = (req, res, next) => {
-  console.log(next);
   User.find({})
     .then((user) => res.status(200).send(user))
     .catch(next);
