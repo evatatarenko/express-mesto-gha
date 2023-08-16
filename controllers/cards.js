@@ -1,15 +1,15 @@
 /* eslint-disable linebreak-style */
-const mongoose = require("mongoose");
-const Card = require("../models/card");
+const mongoose = require('mongoose');
+const Card = require('../models/card');
 
-const Forbidden = require("../Errors/forbidden");
-const NotFound = require("../Errors/notFound");
+const Forbidden = require('../Errors/forbidden');
+const NotFound = require('../Errors/notFound');
 
 const createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user;
   Card.create({ name, link, owner })
-    .then((card) => card.populate("owner"))
+    .then((card) => card.populate('owner'))
     .then((card) => res.status(201).send({ data: card }))
     .catch(next);
 };
@@ -17,8 +17,8 @@ const createCard = (req, res, next) => {
 const getCards = (req, res, next) => {
   Card.find({})
     .populate([
-      { path: "owner", model: "user" },
-      { path: "likes", model: "user" },
+      { path: 'owner', model: 'user' },
+      { path: 'likes', model: 'user' },
     ])
     .then((card) => {
       res.status(200).send({ data: card });
@@ -30,18 +30,16 @@ const deleteCard = (req, res, next) => {
   const _id = req.params.cardId;
 
   Card.findOne({ _id })
-    .populate([{ path: "owner", model: "user" }])
+    .populate([{ path: 'owner', model: 'user' }])
     .then((card) => {
       if (!card) {
-        throw new NotFound("Карточка была удалена");
+        throw new NotFound('Карточка была удалена');
       }
       if (card.owner._id.toString() !== req.user._id.toString()) {
-        throw new Forbidden(
-          "Вы не можете удалить карточку другого пользователя"
-        );
+        throw new Forbidden('Вы не можете удалить карточку другого пользователя');
       }
       Card.findByIdAndDelete({ _id })
-        .populate([{ path: "owner", model: "user" }])
+        .populate([{ path: 'owner', model: 'user' }])
         .then((cardDeleted) => {
           res.send({ data: cardDeleted });
         });
@@ -54,11 +52,11 @@ const addLike = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: owner } },
-    { new: true }
+    { new: true, }
   )
     .populate([
-      { path: "owner", model: "user" },
-      { path: "likes", model: "user" },
+      { path: 'owner', model: 'user' },
+      { path: 'likes', model: 'user' },
     ])
     .then((card) => {
       if (card) {
@@ -74,11 +72,11 @@ const deleteLike = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: owner } },
-    { new: true }
+    { new: true, }
   )
     .populate([
-      { path: "owner", model: "user" },
-      { path: "likes", model: "user" },
+      { path: 'owner', model: 'user' },
+      { path: 'likes', model: 'user' },
     ])
     .then((card) => {
       if (card) {
