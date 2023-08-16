@@ -73,10 +73,7 @@ const deleteLike = (req, res, next) => {
     { $pull: { likes: owner } },
     { new: true }
   )
-    .populate([
-      { path: 'owner', model: 'user' },
-      { path: 'likes', model: 'user' },
-    ])
+    .populate([{ path: 'owner', model: 'user' }, { path: 'likes', model: 'user' },])
     .then((card) => {
       if (card) {
         return res.send({ data: card });
