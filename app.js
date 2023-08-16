@@ -48,7 +48,7 @@ app.use('/', (req, res, next) => {
   next();
 });
 
-// app.use(errorCelebrate());
+app.use(errorCelebrate());
 app.use(errorHandlers);
 
 
