@@ -8,7 +8,7 @@ const createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user;
   Card.create({ name, link, owner })
-    .then((card) => card.populate('owner').execPopulate())
+    .then((card) => card.populate('owner'))
     .then((card) => res.status(201).send({ data: card }))
     .catch(next);
 };
@@ -19,16 +19,16 @@ const getCards = (req, res, next) => {
       { path: 'owner', model: 'user' },
       { path: 'likes', model: 'user' },
     ])
-    .then((cards) => {
-      res.status(200).send({ data: cards });
+    .then((card) => {
+      res.status(200).send({ data: card });
     })
     .catch(next);
 };
 
 const deleteCard = (req, res, next) => {
-  const cardId = req.params.cardId;
+  const _id = req.params.cardId;
 
-  Card.findOne({ _id: cardId })
+  Card.findOne({ _id })
     .populate([{ path: 'owner', model: 'user' }])
     .then((card) => {
       if (!card) {
@@ -37,9 +37,9 @@ const deleteCard = (req, res, next) => {
       if (card.owner._id.toString() !== req.user._id.toString()) {
         throw new Forbidden(
           'Вы не можете удалить карточку другого пользователя'
-        );
+          );
       }
-      return Card.findByIdAndDelete(cardId)
+      Card.findByIdAndDelete({ _id })
         .populate([{ path: 'owner', model: 'user' }])
         .then((cardDeleted) => {
           res.send({ data: cardDeleted });
@@ -50,10 +50,8 @@ const deleteCard = (req, res, next) => {
 
 const addLike = (req, res, next) => {
   const owner = req.user._id;
-  const cardId = req.params.cardId;
-
   Card.findByIdAndUpdate(
-    cardId,
+    req.params.cardId,
     { $addToSet: { likes: owner } },
     { new: true }
   )
@@ -65,17 +63,15 @@ const addLike = (req, res, next) => {
       if (card) {
         return res.send({ data: card });
       }
-      return res.status(404).send({ message: 'Карточка не найдена 404' });
+      return res.status(404).send({ message: `Карточка не найдена 404` });
     })
     .catch(next);
 };
 
 const deleteLike = (req, res, next) => {
   const owner = req.user._id;
-  const cardId = req.params.cardId;
-
   Card.findByIdAndUpdate(
-    cardId,
+    req.params.cardId,
     { $pull: { likes: owner } },
     { new: true }
   )
@@ -87,7 +83,7 @@ const deleteLike = (req, res, next) => {
       if (card) {
         return res.send({ data: card });
       }
-      return res.status(404).send({ message: 'Карточка не найдена 404' });
+      return res.status(404).send({ message: `Карточка не найдена 404` });
     })
     .catch(next);
 };
