@@ -1,5 +1,4 @@
 /* eslint-disable linebreak-style */
-const mongoose = require('mongoose');
 const Card = require('../models/card');
 
 const Forbidden = require('../Errors/forbidden');
@@ -52,7 +51,7 @@ const addLike = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: owner } },
-    { new: true, }
+    { new: true }
   )
     .populate([
       { path: 'owner', model: 'user' },
@@ -62,7 +61,7 @@ const addLike = (req, res, next) => {
       if (card) {
         return res.send({ data: card });
       }
-      return res.status(404).send({ message: `Карточка не найдена 404` });
+      return res.status(404).send({ message: 'Карточка не найдена 404' });
     })
     .catch(next);
 };
@@ -72,7 +71,7 @@ const deleteLike = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: owner } },
-    { new: true, }
+    { new: true }
   )
     .populate([
       { path: 'owner', model: 'user' },
@@ -82,7 +81,7 @@ const deleteLike = (req, res, next) => {
       if (card) {
         return res.send({ data: card });
       }
-      return res.status(404).send({ message: `Карточка не найдена 404` });
+      return res.status(404).send({ message: 'Карточка не найдена 404' });
     })
     .catch(next);
 };
