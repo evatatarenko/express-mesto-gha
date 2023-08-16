@@ -65,7 +65,7 @@ const addLike = (req, res, next) => {
       if (card) {
         return res.send({ data: card });
       }
-      return res.status(404).send({ message: `Карточка не найдена 404` });
+      return res.status(404).send({ message: 'Карточка не найдена 404' });
     })
     .catch(next);
 };
@@ -87,7 +87,7 @@ const deleteLike = (req, res, next) => {
       if (card) {
         return res.send({ data: card });
       }
-      return res.status(404).send({ message: `Карточка не найдена 404` });
+      return res.status(404).send({ message: 'Карточка не найдена 404' });
     })
     .catch(next);
 };
