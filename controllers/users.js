@@ -1,11 +1,11 @@
 /* eslint-disable linebreak-style */
-const User = require('../models/user');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const { JWT_SECRET = 'hghghghghghghghg' } = process.env;
-const NotFound = require('../Errors/notFound');
+const User = require("../models/user");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET = "hghghghghghghghg" } = process.env;
+const NotFound = require("../Errors/notFound");
 
-console.log(JWT_SECRET)
+console.log(JWT_SECRET);
 
 const getUser = (req, res, next) => {
   const { userId } = req.params;
@@ -16,7 +16,7 @@ const getUser = (req, res, next) => {
         return res.send({ data: user });
       }
       if (!user) {
-        throw new NotFound('Пользователь не найден');
+        throw new NotFound("Пользователь не найден");
       }
     })
     .catch((error) => {
@@ -25,23 +25,26 @@ const getUser = (req, res, next) => {
 };
 
 const getUsers = (req, res, next) => {
-  console.log(next)
+  console.log(next);
   User.find({})
     .then((user) => res.status(200).send(user))
     .catch(next);
 };
 
 const createUser = (req, res, next) => {
-  const { name, about, avatar, email, password, } = req.body;
+  const { name, about, avatar, email, password } = req.body;
 
-  bcrypt.hash(password, 10)
-    .then((hash) => User.create({
-      name,
-      about,
-      avatar,
-      email,
-      password: hash,
-    }))
+  bcrypt
+    .hash(password, 10)
+    .then((hash) =>
+      User.create({
+        name,
+        about,
+        avatar,
+        email,
+        password: hash,
+      })
+    )
     .then((user) => {
       const userWithoutPassword = { ...user.toObject() };
       delete userWithoutPassword.password;
@@ -55,13 +58,11 @@ const login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign(
-        { _id: user._id },
-        JWT_SECRET,
-        { expiresIn: '7d' },
-      );
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
       res
-        .cookie('token', token, {
+        .cookie("token", token, {
           maxAge: 3600000,
           httpOnly: true,
           sameSite: true,
@@ -73,33 +74,41 @@ const login = (req, res, next) => {
 
 const changeUser = (req, res, next) => {
   const { name, about } = req.body;
-    const userId = req.user._id;
-    User.findByIdAndUpdate(userId, {name, about}, {
+  const userId = req.user._id;
+  User.findByIdAndUpdate(
+    userId,
+    { name, about },
+    {
       new: true,
       runValidators: true,
+    }
+  )
+    .then((user) => {
+      if (user) {
+        return res.send({ data: user });
+      }
+      const error = new NotFound("Пользователь по указанному _id не найден");
+      return next(error);
     })
-      .then((user) => {
-        if (user) {
-          return res.send({ data: user });
-        }
-        const error = new NotFound('Пользователь по указанному _id не найден');
-        return next(error);
-      })
-      .catch(next);
+    .catch(next);
 };
 
 const changeAvatar = (req, res, next) => {
   const { avatar } = req.body;
   const userId = req.user._id;
-  User.findByIdAndUpdate(userId, {avatar}, {
-    new: true,
-    runValidators: true,
-  })
+  User.findByIdAndUpdate(
+    userId,
+    { avatar },
+    {
+      new: true,
+      runValidators: true,
+    }
+  )
     .then((user) => {
       if (user) {
         return res.send({ data: user });
       }
-      const error = new NotFound('Пользователь по указанному _id не найден');
+      const error = new NotFound("Пользователь по указанному _id не найден");
       return next(error);
     })
     .catch(next);
