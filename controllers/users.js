@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 const NotFound = require('../Errors/notFound');
+
 const { JWT_SECRET = 'hghghghghghghghg' } = process.env;
 
 const getUser = (req, res, next) => {
@@ -28,7 +29,13 @@ const getUsers = (req, res, next) => {
 };
 
 const createUser = (req, res, next) => {
-  const { name, about, avatar, email, password } = req.body;
+  const {
+    name,
+    about,
+    avatar,
+    email,
+    password,
+  } = req.body;
 
   bcrypt
     .hash(password, 10)
@@ -71,14 +78,7 @@ const login = (req, res, next) => {
 const changeUser = (req, res, next) => {
   const { name, about } = req.body;
   const userId = req.user._id;
-  User.findByIdAndUpdate(
-    userId,
-    { name, about },
-    {
-      new: true,
-      runValidators: true,
-    }
-  )
+  User.findByIdAndUpdate(userId, { name, about }, {new: true, runValidators: true})
     .then((user) => {
       if (user) {
         return res.send({ data: user });
@@ -92,14 +92,7 @@ const changeUser = (req, res, next) => {
 const changeAvatar = (req, res, next) => {
   const { avatar } = req.body;
   const userId = req.user._id;
-  User.findByIdAndUpdate(
-    userId,
-    { avatar },
-    {
-      new: true,
-      runValidators: true,
-    }
-  )
+  User.findByIdAndUpdate(userId, { avatar }, {new: true, runValidators: true})
     .then((user) => {
       if (user) {
         return res.send({ data: user });
