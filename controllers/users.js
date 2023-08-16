@@ -76,7 +76,7 @@ const login = (req, res, next) => {
 const changeUser = (req, res, next) => {
   const { name, about } = req.body;
   const userId = req.user._id;
-  User.findByIdAndUpdate(userId, { name, about }, {new: true, runValidators: true})
+  User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (user) {
         return res.send({ data: user });
@@ -90,7 +90,7 @@ const changeUser = (req, res, next) => {
 const changeAvatar = (req, res, next) => {
   const { avatar } = req.body;
   const userId = req.user._id;
-  User.findByIdAndUpdate(userId, { avatar }, {new: true, runValidators: true})
+  User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (user) {
         return res.send({ data: user });
