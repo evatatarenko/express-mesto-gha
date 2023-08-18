@@ -51,10 +51,10 @@ const addLike = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: owner } }, { new: true })
     .populate([{ path: 'owner', model: 'user' }, { path: 'likes', model: 'user' }])
     .then((card) => {
-      if (card) {
-        return res.send({ data: card });
+      if (!card) {
+        throw new NotFound('Карточка не найдена 404');
       }
-      return res.status(404).send({ message: 'Карточка не найдена 404' });
+      return res.send({ data: card });
     })
     .catch(next);
 };
@@ -64,10 +64,10 @@ const deleteLike = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: owner } }, { new: true })
     .populate([{ path: 'owner', model: 'user' }, { path: 'likes', model: 'user' }])
     .then((card) => {
-      if (card) {
-        return res.send({ data: card });
+      if (!card) {
+        throw new NotFound('Карточка не найдена 404');
       }
-      return res.status(404).send({ message: 'Карточка не найдена 404' });
+      return res.send({ data: card });
     })
     .catch(next);
 };
